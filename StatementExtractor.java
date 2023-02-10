@@ -9,9 +9,7 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.Files;
@@ -29,13 +27,26 @@ public class StatementExtractor {
             return;
         }
 
-        try {
-            // Use try-with-resources to automatically close file stream
-            String fileContent = Files.readString(filePath);
-            TextDocument textDocument = TextDocuments.from(fileContent);
-            SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
-            StatementVisitor visitor = new StatementVisitor();
-            syntaxTree.rootNode().accept(visitor);
+//        try {
+//            // Use try-with-resources to automatically close file stream
+//            String fileContent = Files.readString(filePath);
+//            TextDocument textDocument = TextDocuments.from(fileContent);
+//            SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
+//            StatementVisitor visitor = new StatementVisitor();
+//            syntaxTree.rootNode().accept(visitor);
+//            visitor.writeToCSV("output.csv");
+//        } catch (IOException e) {
+//            System.out.println("Error reading file: " + e.getMessage());
+//        }
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath.toString()))) {
+            String line;
+            StatementVisitor visitor = null;
+            while ((line = br.readLine()) != null) {
+                TextDocument textDocument = TextDocuments.from(line);
+                SyntaxTree syntaxTree = SyntaxTree.from(textDocument);
+                visitor = new StatementVisitor();
+                syntaxTree.rootNode().accept(visitor);
+            }
             visitor.writeToCSV("output.csv");
         } catch (IOException e) {
             System.out.println("Error reading file: " + e.getMessage());
